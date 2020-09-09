@@ -1,13 +1,22 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const repo = require("./../repos/vehicle.repo");
 const redis = require("redis");
+const env = require("./../common/env");
 
 require("./../common/db");
 
-const client = redis.createClient();
-client.on('error', function(err) {
-  console.log(err);
-});
+let client = null;
+
+if (env.get("ENABLE_REDIS") == "1") {
+  console.log('Redis is available.')
+
+  client = redis.createClient();
+
+  client.on('error', function(err) {
+    console.log(err);
+  });
+
+} else console.log("Redis is not available.")
 
 /**
  *
@@ -20,16 +29,24 @@ const getVehicle = async (req, res) => {
     const id = req.params.id;
 
     if (ObjectId.isValid(id)) {
-      client.get(buildKey(id), async (err, data) => {
-        if (data) {
-            res.status(200).send({...JSON.parse(data), isCached: true });
-        } else {
-          const item = await repo.readById(id);
-          updateCache(item);        
+      if (client) {
 
-          res.status(200).send({...item._doc, isCached: false });
-        }
-      });
+        client.get(buildKey(id), async (err, data) => {
+          if (data) {
+            res.status(200).send({...JSON.parse(data), isCached: true });
+          } else {
+            const item = await repo.readById(id);
+            updateCache(item);        
+
+            res.status(200).send({...item._doc, isCached: false });
+          }
+        });
+
+      } else {
+        const item = await repo.readById(id);     
+
+        res.status(200).send({...item._doc, isCached: false });
+      }    
 
       return;
     }
@@ -93,7 +110,7 @@ const deleteVehicle = async (req, res) => {
 
     if (ObjectId.isValid(id)) {
       const item = await repo.deleteById(id);
-      client.del(buildKey(item.id));
+      if (client) client.del(buildKey(item.id));
 
       res.status(200).send(item);
       return;
@@ -110,10 +127,12 @@ function buildKey(id) {
 };
 
 function updateCache(item) {
-  const id = item.id;
-  const data = {id, vehicleNumber: item.vehicleNumber, brandName: item.brandName, vehicleName: item.vehicleName, description: item.description};
+  if (client) {
+    const id = item.id;
+    const data = {id, vehicleNumber: item.vehicleNumber, brandName: item.brandName, vehicleName: item.vehicleName, description: item.description};
 
-  client.set(buildKey(id), JSON.stringify(data), 'EX', 300);
+    client.set(buildKey(id), JSON.stringify(data), 'EX', 300);
+  }
 }
 
 module.exports = {
