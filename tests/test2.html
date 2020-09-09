@@ -1,0 +1,22 @@
+<html>
+
+
+<body>
+    <a href="http://localhost:4000/user/5f57168eac1a52553c1f3399">Read User By ID</a>
+    <br>
+    <a href="http://localhost:4000/user/account/BB12-33-45">Read User By Account Number</a>
+    <br>
+    <a href="http://localhost:4000/user/identity/1234-00-5678-99">Read User by Identity Number</a>
+    <br>
+    <a href="http://localhost:4000/user/delete/5f58222dc077260458ff3e4e">Delete User by ID (Ensure ID exists before deleted)</a>
+    <br><br><br>
+  <form method="post" action="http://localhost:4000/user/5f57168eac1a52553c1f3399">
+    User Name: <input type="text" name="userName" id="userName" value="budi1234" /><br>
+    Account Number: <input type="text" name="accountNumber" id="accountNumber" value="BB12-33-66" /><br>
+    Email Address: <input type="text" name="emailAddress" id="emailAddress" value="budi1234@example.com" /><br>
+    Identity Number: <input type="text" name="identityNumber" id="identityNumber" value="1234-00-5678-66" /><br>
+    Password: <input type="text" name="password" id="password" value="admin" />
+    <input type="submit" value="Update User" />
+  </form> 
+</body>
+</html>
