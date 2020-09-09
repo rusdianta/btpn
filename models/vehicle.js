@@ -23,6 +23,12 @@ const schema = mongoose.Schema({
     trim: true
   }
 });
+
+schema.index(
+  { vehicleNumber: 1, brandName: 1 },
+  { unique: true }
+);
+
 schema.set("toObject", { virtuals: true });
 schema.set("toJSON", { virtuals: true });
 
