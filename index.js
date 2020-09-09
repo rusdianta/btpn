@@ -7,7 +7,7 @@ const env = require("./common/env");
 const { routes } = require("./routes");
 
 const app = express();
-const port = env.get("LISTEN_PORT");
+const port = process.env.PORT || env.get("LISTEN_PORT");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
